@@ -51,8 +51,8 @@ def bound_box_csv(idx: int, image_path: str, path_to_csv: str):
     bb_list = get_bound_box(image_path)
     with open(path_to_csv, mode='x', newline='') as file:
         csv_writer = csv.writer(file, delimiter=';')
-        csv_writer.writerow(["Bound box #", "Bound box X", "Bound box Y", "Bound box width", "Bound box height"])
-        for bb in bb_list:
-            bb = list(bb)
-            bb.insert(idx, 0)
+        csv_writer.writerow(["BB #", "X", "Y", "W", "H"])
+        for i in range(len(bb_list)):
+            bb = list(bb_list[i])
+            bb.insert(0, i)
             csv_writer.writerow(bb)

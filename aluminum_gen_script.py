@@ -234,9 +234,14 @@ class DATA_GENERATOR_OT_RenderOperator(bpy.types.Operator):
         enable_nodes(inverted_bump_list, "inverted_bump_adder")
         enable_nodes(bump_list, "bump_adder")
         enable_effects(props.use_roughness, props.use_normal, props.use_displace)
+        
+        nodes_alum = bpy.data.materials["aluminum"].node_tree.nodes
+        base_node = nodes_alum.get("metal_base")
+        
         render_start = datetime.now()
 
         for image_idx in range(props.dataset_size):
+            base_node.inputs[0].default_value = round(random.uniform(-100, 100), 3)
             transfer_values_to_bitmaps(present_list, random_only=True)
             render_bitmaps(path, present_list, image_idx, props.max_tries, props.find_contours, props.find_bound_box)
             render_aluminum(path, image_idx)
