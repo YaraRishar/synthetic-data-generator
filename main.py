@@ -3,6 +3,14 @@ import tkinter as tk
 from tkinter import filedialog, font, scrolledtext
 from docker_runner import DockerManager
 
+
+"""
+КОМАНДА
+требуется: контейнер tensorflow:latest
+docker run -u $(id -u):$(id -g) --gpus all -it -v /home/yara/Documents/otherstuff_v3.0/tech_prog/aluminum_generator/:/tf tensorflow-container:latest
+"""
+
+
 class VerifierGUI:
     def __init__(self):
         self.root = tk.Tk()
