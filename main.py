@@ -1,21 +1,20 @@
 import threading
 import tkinter as tk
-from tkinter import filedialog, font
+from tkinter import filedialog, font, scrolledtext
+from docker_runner import DockerManager
 
 class VerifierGUI:
     def __init__(self):
         self.root = tk.Tk()
+        self.docker_manager = DockerManager()
 
-        self.real_path, self.synthetic_path = None, None
         tk.Misc.rowconfigure(self.root, [i for i in range(6)], weight=1)
         tk.Misc.columnconfigure(self.root, [i for i in range(2)], weight=1)
         label_font = font.Font(family="Verdana", size=12)
-        entry_font = font.Font(family="Courier", size=12)
+        entry_font = font.Font(family="Verdana", size=11)
         button_font = font.Font(family="Verdana", size=15)
 
         self.root.title("Synth_Verifier")
-        self.results_var = tk.StringVar()
-        self.results_var.set("Результатов пока нет.")
 
         self.dataset_real_lbl = tk.Label(self.root, text="Датасет из реальных данных:", font=label_font)
         self.dataset_real_entry = tk.Entry(self.root, font=entry_font)
@@ -33,11 +32,13 @@ class VerifierGUI:
         self.batch_count_lbl = tk.Label(self.root, text="Размер batch:", font=label_font)
         self.batch_count_entry = tk.Entry(self.root, font=entry_font)
 
-        self.test_size_lbl = tk.Label(self.root, text="Размер тестового датасета (%):", font=label_font)
+        self.test_size_lbl = tk.Label(self.root, text="Размер тестового датасета:", font=label_font)
         self.test_size_entry = tk.Entry(self.root, font=entry_font)
 
-        self.results_lbl = tk.Label(self.root, textvariable=self.results_var, font=label_font)
-        self.start_btn = tk.Button(self.root, text="Начать верификацию", font=font.Font(family="Verdana", size=12))
+        self.results_text = scrolledtext.ScrolledText(self.root, font=label_font)
+        self.results_text.config(wrap=tk.WORD, state="disabled", font="Verdana", width=70, height=20)
+        self.start_btn = tk.Button(self.root, text="Начать верификацию",
+                                   font=font.Font(family="Verdana", size=12), command=self.run_container)
 
         self.dataset_real_lbl.grid(column=0, row=0, sticky="E", pady=5, padx=5)
         self.dataset_real_entry.grid(column=1, row=0, columnspan=3, sticky="W")
@@ -56,7 +57,7 @@ class VerifierGUI:
         self.test_size_lbl.grid(column=0, row=4, sticky="E", pady=5, padx=5)
         self.test_size_entry.grid(column=1, row=4, sticky="W")
 
-        self.results_lbl.grid(column=2, row=2, padx=10, pady=10)
+        self.results_text.grid(column=3, row=0, padx=10, pady=10, rowspan=6)
         self.start_btn.grid(column=1, row=5, padx=5, pady=10)
 
         self.root.mainloop()
@@ -76,15 +77,25 @@ class VerifierGUI:
         self.dataset_synthetic_entry.insert(0, file_path)
 
     def run_container(self):
+        real_path, synthetic_path = self.get_paths()
+        batch_count, epoch_count = self.batch_count_entry.get(), self.epoch_count_entry.get()
+        test_size = self.test_size_entry.get()
+
+        args = [real_path, synthetic_path, epoch_count, batch_count, test_size]
         self.update_output("Контейнер запущен...")
 
         threading.Thread(
-            target=self.container_mgr.run_script,
-            args=("helloworld.py", self.update_output),
+            # target=self.docker_manager.run_script(args_for_model=args, callback=self.update_output),
+            target=self.docker_manager.run_script(args_for_model=args),
+            args="model.py",
             daemon=True).start()
 
     def update_output(self, text):
-        self.results_var.set(text)
+        self.results_text.config(state="normal")
+        self.results_text.insert(tk.END, "".join(text))
+        self.results_text.see(tk.END)
+        self.results_text.config(state="disabled")
+
         self.root.update_idletasks()
 
 gui = VerifierGUI()

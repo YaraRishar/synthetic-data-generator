@@ -2,49 +2,40 @@ import docker
 import os
 
 
-class DockerManager():
+class DockerManager:
     def __init__(self):
         self.client = docker.from_env()
         self.image_name = "tensorflow-container:latest"
         self.host_dir = os.getcwd()
 
-    def get_or_build_image(self):
-        client = docker.from_env()
-        image_name = "tensorflow-container:latest"
+    def ensure_image_exists(self):
         try:
-            client.images.get(image_name)
-            print("Image already exists, using existing image")
+            self.client.images.get(self.image_name)
+            print("Image exists")
         except docker.errors.ImageNotFound:
-            print("Image not found, building from Dockerfile")
-            image, _ = client.images.build(path=".", tag=image_name)
-            print(f"Successfully built image {image.id}")
-        return image_name
+            print("Building image...")
+            self.client.images.build(path=".", tag=self.image_name)
 
-
-    def run_python_in_container(image_name, python_script_path):
-        client = docker.from_env()
-
-        user_id = os.getuid()
-        group_id = os.getgid()
-        command = ["python", f"/tf/{python_script_path}"]
-        host_dir = os.getcwd()
-
-        container_logs = client.containers.run(
-            image=image_name,
+    def run_script(self, args_for_model, callback=None):
+        command = ["python", f"/tf/model.py"] + args_for_model
+        command = " ".join(command)
+        # real_path, synthetic_path, epoch_count, batch_count, test_size
+        container = self.client.containers.run(
+            image=self.image_name,
             command=command,
-            remove=True,
-            user=f"{user_id}:{group_id}",
+            user=f"{os.getuid()}:{os.getgid()}",
             runtime="nvidia",
             device_requests=[docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])],
-            volumes={host_dir: {'bind': '/tf', 'mode': 'rw'}},
+            volumes={self.host_dir: {'bind': '/tf', 'mode': 'rw'}},
             working_dir="/tf",
-            stdin_open=True,
-            tty=True)
+            detach=True,
+            stdout=True,
+            stderr=True
+        )
 
-        print(container_logs.decode('utf-8'))
+        for line in container.logs(stream=True):
+            print(line)
+            if callback:
+                callback(line.decode('utf-8').strip())
 
-
-image_name = get_or_build_image()
-run_python_in_container(
-    image_name=image_name,
-    python_script_path="helloworld.py")
+        container.remove()
