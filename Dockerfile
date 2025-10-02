@@ -1,11 +1,22 @@
-FROM tensorflow/tensorflow:latest-gpu
+ARG TF_VERSION=latest-gpu
+FROM tensorflow/tensorflow:${TF_VERSION}
 
-RUN apt-get update
-RUN apt-get install -y libgl1-mesa-glx
+# Системные зависимости лучше ставить одним слоем
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /tf
-RUN python -m venv .venv1
-RUN pip install --upgrade pip
-RUN pip install opencv-python
-RUN pip install keras
-RUN pip install pandas
-RUN pip install scikit-learn
+
+# витуальная среда в docker-контейнре не нужна - он сам по себе хорошо изолирован
+# RUN python -m venv .venv1
+
+# python-пакеты тоже ставим одним слоем (можно было отправить все в requirements.txt и устанавливать уже оттуда)...
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    opencv-python \
+    keras \
+    pandas \
+    scikit-learn
+
+CMD ["/bin/bash"]

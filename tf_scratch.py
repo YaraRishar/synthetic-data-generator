@@ -101,7 +101,7 @@ def visualize_prediction(image_path, model, threshold=0.0001):
             x2, y2 = int((x + bw) * w), int((y + bh) * h)
             cv.rectangle(img_color, (x1, y1), (x2, y2), (0, 255, 0), 1)
 
-    cv.imwrite(f"{image_path[:-10]}.jpg", img_color)
+    print(cv.imwrite(f"{image_path.split('.')[0]}_resulting.jpg", img_color))
 
 
 visualize_prediction("example_datasets_scratches/synthetic/images/image6.jpg", model)

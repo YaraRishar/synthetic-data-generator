@@ -14,7 +14,7 @@ docker run -u $(id -u):$(id -g) --gpus all -it -v /home/yara/Documents/otherstuf
 class VerifierGUI:
     def __init__(self):
         self.root = tk.Tk()
-        self.docker_manager = DockerManager()
+        self.docker_manager = DockerManager(use_gpu="auto")
 
         tk.Misc.rowconfigure(self.root, [i for i in range(6)], weight=1)
         tk.Misc.columnconfigure(self.root, [i for i in range(2)], weight=1)
@@ -89,14 +89,19 @@ class VerifierGUI:
         batch_count, epoch_count = self.batch_count_entry.get(), self.epoch_count_entry.get()
         test_size = self.test_size_entry.get()
 
+        # Валидация входных данных
+        if not all([real_path, synthetic_path, batch_count, epoch_count, test_size]):
+            self.update_output("Заполните все поля!\n")
+            return
+
         args = [real_path, synthetic_path, epoch_count, batch_count, test_size]
-        self.update_output("Контейнер запущен...")
+        self.update_output("Контейнер запускается...")
 
         threading.Thread(
-            # target=self.docker_manager.run_script(args_for_model=args, callback=self.update_output),
-            target=self.docker_manager.run_script(args_for_model=args),
-            args="model.py",
-            daemon=True).start()
+            target=self.docker_manager.run_script,
+            args=(args, self.update_output),  # тут, по идее, лучше передавать аргументы как кортеж
+            daemon=True
+        ).start()
 
     def update_output(self, text):
         self.results_text.config(state="normal")
