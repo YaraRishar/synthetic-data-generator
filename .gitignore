@@ -1,0 +1,53 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- IDE / editors ---
+.idea/
+.vscode/
+*.iml
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Training / inference outputs ---
+# train.py: JSON with metrics
+results/
+# overlay predictions per synthetic fraction
+**/predictions/pred*/
+*_overlay.jpg
+# _imageN.jpg_resulting.jpg
+*_resulting.jpg
+# model checkpoints
+*.weights.h5
+*.keras
+*.h5
+checkpoint
+checkpoint.*
+
+# --- Datasets and large artifacts (generated or external) ---
+example_datasets_scratches/
+example_datasets_scratches_*/
+output_example/
+*.tar
+*.tar.gz
+*.zip
+
+# --- Blender ---
+# backups; the .blend project file itself stays tracked
+*.blend1

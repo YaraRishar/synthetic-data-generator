@@ -1,13 +1,13 @@
 import threading
 import tkinter as tk
-from tkinter import filedialog, font, scrolledtext
+from tkinter import font, filedialog, scrolledtext
+
 from docker_runner import DockerManager
 
-
 """
-КОМАНДА
-требуется: контейнер tensorflow:latest
-docker run -u $(id -u):$(id -g) --gpus all -it -v /home/yara/Documents/otherstuff_v3.0/tech_prog/aluminum_generator/:/tf tensorflow-container:latest
+КОМАНДА (Linux):
+требуется контейнер tensorflow-container:latest
+docker run -u $(id -u):$(id -g) --gpus all -it -v $(pwd):/tf tensorflow-container:latest
 """
 
 
@@ -27,12 +27,12 @@ class VerifierGUI:
         self.dataset_real_lbl = tk.Label(self.root, text="Датасет из реальных данных:", font=label_font)
         self.dataset_real_entry = tk.Entry(self.root, font=entry_font)
         self.dataset_real_btn = tk.Button(self.root, text=u"\U0001F4C2", font=button_font,
-                                          bg="grey", command=lambda : self.ask_dir("real"))
+                                          bg="grey", command=lambda: self.ask_dir("real"))
 
         self.dataset_synthetic_lbl = tk.Label(self.root, text="Датасет для верификации:", font=label_font)
         self.dataset_synthetic_entry = tk.Entry(self.root, font=entry_font)
         self.dataset_synthetic_btn = tk.Button(self.root, text=u"\U0001F4C2", font=button_font,
-                                               bg="grey", command=lambda : self.ask_dir("synthetic"))
+                                               bg="grey", command=lambda: self.ask_dir("synthetic"))
 
         self.epoch_count_lbl = tk.Label(self.root, text="Количество эпох:", font=label_font)
         self.epoch_count_entry = tk.Entry(self.root, font=entry_font)
@@ -71,39 +71,41 @@ class VerifierGUI:
         self.root.mainloop()
 
     def get_paths(self):
-        real_dataset_path = self.dataset_real_entry.get()
-        synthetic_dataset_path = self.dataset_synthetic_entry.get()
-        return real_dataset_path, synthetic_dataset_path
+        return self.dataset_real_entry.get(), self.dataset_synthetic_entry.get()
 
     def ask_dir(self, dataset_type):
         file_path = filedialog.askdirectory()
-        if dataset_type =="real":
-            self.dataset_real_entry.delete(0, tk.END)
-            self.dataset_real_entry.insert(0, file_path)
+        if not file_path:
             return
-        self.dataset_synthetic_entry.delete(0, tk.END)
-        self.dataset_synthetic_entry.insert(0, file_path)
+        entry = self.dataset_real_entry if dataset_type == "real" else self.dataset_synthetic_entry
+        entry.delete(0, tk.END)
+        entry.insert(0, file_path)
 
     def run_container(self):
         real_path, synthetic_path = self.get_paths()
         batch_count, epoch_count = self.batch_count_entry.get(), self.epoch_count_entry.get()
         test_size = self.test_size_entry.get()
-
         args = [real_path, synthetic_path, epoch_count, batch_count, test_size]
-        self.update_output("Контейнер запущен...")
 
+        self.update_output("Контейнер запущен...")
+        # передаём ССЫЛКУ на функцию (раньше она вызывалась сразу, блокируя GUI),
+        # аргументы — через kwargs, обновления UI — через потокобезопасный callback
         threading.Thread(
-            # target=self.docker_manager.run_script(args_for_model=args, callback=self.update_output),
-            target=self.docker_manager.run_script(args_for_model=args),
-            args="model.py",
-            daemon=True).start()
+            target=self.docker_manager.run_script,
+            kwargs={"args_for_model": args, "callback": self.post_output},
+            daemon=True,
+        ).start()
+
+    def post_output(self, text):
+        # вызывается из фонового потока → откладываем в UI-поток
+        self.root.after(0, self.update_output, text)
 
     def update_output(self, text):
         self.results_text.config(state="normal")
-        self.results_text.insert(tk.END, "".join(text))
+        self.results_text.insert(tk.END, text + "\n")
         self.results_text.see(tk.END)
         self.results_text.config(state="disabled")
 
-        self.root.update_idletasks()
 
-gui = VerifierGUI()
+if __name__ == "__main__":
+    VerifierGUI()

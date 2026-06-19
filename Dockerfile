@@ -1,11 +1,16 @@
 FROM tensorflow/tensorflow:latest-gpu
 
-RUN apt-get update
-RUN apt-get install -y libgl1-mesa-glx
+# libgl1-mesa-glx переименован в libgl1 в свежих Ubuntu; ставим оба варианта на выбор
+RUN apt-get update && \
+    (apt-get install -y --no-install-recommends libgl1 || \
+     apt-get install -y --no-install-recommends libgl1-mesa-glx) && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /tf
-RUN python -m venv .venv1
-RUN pip install --upgrade pip
-RUN pip install opencv-python
-RUN pip install keras
-RUN pip install pandas
-RUN pip install scikit-learn
+
+# venv в контейнере не нужен (раньше .venv1 создавался, но пакеты ставились мимо
+# него в системный python). Ставим напрямую.
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir opencv-python-headless keras pandas scikit-learn
+
+CMD ["python", "/tf/train.py"]

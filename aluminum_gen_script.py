@@ -7,6 +7,18 @@ import numpy as np
 import sys
 import importlib
 
+# contours используется внутри render_bitmaps; импортируем на верхнем уровне,
+# чтобы аддон работал и при регистрации, а не только при запуске как __main__.
+# Каталог .blend-файла нужно добавить в sys.path до импорта.
+_blend_dir = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
+if _blend_dir and _blend_dir not in sys.path:
+    sys.path.append(_blend_dir)
+try:
+    import contours
+    importlib.reload(contours)
+except ImportError:
+    contours = None
+
 
 bl_info = {
     "name": "Data Generator",
@@ -256,11 +268,11 @@ def dir_handler(output_path: str) -> str:
     """ Создать папки для вывода отрендеренных изображений и bitmaps """
 
     now = datetime.now()
-    folder = now.strftime("%H-%M-%S %d.%m.%Y")
+    # подчёркивание вместо пробела — единообразно и безопасно для всех ОС
+    folder = now.strftime("%H-%M-%S_%d.%m.%Y")
     path = os.path.join(output_path, folder)
-    os.mkdir(path)
-    os.mkdir(os.path.join(path, "images"))
-    os.mkdir(os.path.join(path, "bitmaps"))
+    os.makedirs(os.path.join(path, "images"), exist_ok=True)
+    os.makedirs(os.path.join(path, "bitmaps"), exist_ok=True)
     return path
 
 
@@ -415,9 +427,11 @@ def render_bitmaps(path: str, present_list: list, image_indx: int, max_tries: in
         links.remove(link)
 
         # CONTOURS!
-        if find_contours:
+        if (find_contours or find_bound_box) and contours is None:
+            print("Модуль contours не найден рядом с .blend — пропускаю контуры/bbox")
+        if find_contours and contours is not None:
             contours.contours_csv(idx=image_indx, image_path=path_to_bitmap, path_to_csv=path_to_csv)
-        if find_bound_box:
+        if find_bound_box and contours is not None:
             contours.bound_box_csv(idx=image_indx, image_path=path_to_bitmap, path_to_csv=path_to_csv)
 
 
@@ -427,8 +441,14 @@ def limit_blank_defects(path_to_image: str, node, max_tries: int):
 
     tries, whites = 0, 0
     while tries <= max_tries:
-        im = cv.imread(path_to_image)
-        whites = np.sum(im >= 0)
+        # Unicode-safe чтение: путь содержит кириллическое имя дефекта, а cv.imread
+        # на Windows такие пути не открывает (вернул бы None)
+        im = cv.imdecode(np.fromfile(path_to_image, dtype=np.uint8), cv.IMREAD_COLOR)
+        if im is None:
+            break
+        # считаем НЕ чёрные (дефектные) пиксели; раньше было im >= 0 — это всегда
+        # все пиксели, поэтому защита от пустых дефектов никогда не срабатывала
+        whites = int(np.count_nonzero(im > 0))
         if whites >= 100:
             break
         else:
@@ -459,11 +479,6 @@ def unregister():
 
 
 if __name__ == "__main__":
-    import_dir = os.path.dirname(bpy.data.filepath)
-    if import_dir not in sys.path:
-        sys.path.append(import_dir)
-
-    import contours
-    importlib.reload(contours)
-
+    # contours уже импортирован на верхнем уровне (с добавлением каталога .blend
+    # в sys.path), отдельно делать это здесь больше не нужно
     register()
