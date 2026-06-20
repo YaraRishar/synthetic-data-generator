@@ -19,6 +19,7 @@ class TrainConfig:
     results_dir: str = "results"
     weights: str = ""             # путь к чекпойнту для загрузки/сохранения
     seed: int = 0
+    max_images: int = 0           # 0 = без ограничения; иначе обрезать датасеты (ускорение/демо)
 
 
 def parse_args(argv=None) -> TrainConfig:
@@ -36,10 +37,11 @@ def parse_args(argv=None) -> TrainConfig:
     p.add_argument("--results-dir", default="results")
     p.add_argument("--weights", default="")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--max-images", type=int, default=0)
     a = p.parse_args(argv)
     return TrainConfig(
         real=a.real, synthetic=a.synthetic, epochs=a.epochs, batch=a.batch,
         test_size=a.test_size, mode=a.mode, real_size=a.real_size,
         synthetic_size=a.synthetic_size, threshold=a.threshold,
         learning_rate=a.learning_rate, results_dir=a.results_dir,
-        weights=a.weights, seed=a.seed)
+        weights=a.weights, seed=a.seed, max_images=a.max_images)

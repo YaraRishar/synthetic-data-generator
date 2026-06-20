@@ -60,18 +60,24 @@ def _fractions(cfg: TrainConfig):
     return [(round(1 - i / 10, 1), round(i / 10, 1)) for i in range(11)]
 
 
-def run(cfg: TrainConfig) -> dict:
+def run(cfg: TrainConfig, keras_callbacks=None, on_fraction=None) -> dict:
+    """keras_callbacks — доп. колбэки Keras на каждый fit (например, прогресс UI).
+    on_fraction(idx, total, real_size, synth_size, metrics) — после каждой доли."""
     rng = np.random.default_rng(cfg.seed)
     time_start = time.time()
     print("Загрузка датасетов...")
     X_real_full, y_real_full = seg_data.load_dataset(cfg.real)
     X_synth_full, y_synth_full = seg_data.load_dataset(cfg.synthetic)
+    if cfg.max_images and cfg.max_images > 0:
+        X_real_full, y_real_full = X_real_full[:cfg.max_images], y_real_full[:cfg.max_images]
+        X_synth_full, y_synth_full = X_synth_full[:cfg.max_images], y_synth_full[:cfg.max_images]
     print(f"реальных: {len(X_real_full)}, синтетики: {len(X_synth_full)}")
 
     results = {"iou": [], "loss": [], "real_size": [], "synthetic_size": [],
                "real_elements": [], "synthetic_elements": [], "total_time": -1}
 
-    for real_size, synthetic_size in _fractions(cfg):
+    fractions = _fractions(cfg)
+    for frac_idx, (real_size, synthetic_size) in enumerate(fractions):
         tf.keras.backend.clear_session()  # не копить графы между прогонами
         real_params = (X_real_full, y_real_full, real_size)
         synth_params = (X_synth_full, y_synth_full, synthetic_size)
@@ -80,10 +86,13 @@ def run(cfg: TrainConfig) -> dict:
             real_params, synth_params, test_size=cfg.test_size, rng=rng)
         real_n, synth_n = seg_data.get_number_of_elements(real_params, synth_params)
 
+        cbs = _make_callbacks(cfg.weights)
+        if keras_callbacks:
+            cbs = cbs + list(keras_callbacks)
         model = _build_compiled(cfg)
         model.fit(X_mixed, y_mixed, validation_data=(X_test, y_test),
                   epochs=cfg.epochs, batch_size=cfg.batch, verbose=1,
-                  callbacks=_make_callbacks(cfg.weights))
+                  callbacks=cbs)
 
         out_dir = Path(cfg.real) / "predictions" / f"pred{real_size}"
         sample = sorted(os.listdir(os.path.join(cfg.real, "images")))[::10]
@@ -100,6 +109,9 @@ def run(cfg: TrainConfig) -> dict:
         results["real_elements"].append(real_n)
         results["synthetic_elements"].append(synth_n)
         print(f"real={real_size} synth={synthetic_size} -> iou={iou} loss={loss}")
+        if on_fraction:
+            on_fraction(frac_idx, len(fractions), real_size, synthetic_size,
+                        {"iou": iou, "loss": loss})
 
     results["total_time"] = round(time.time() - time_start)
 
