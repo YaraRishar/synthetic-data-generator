@@ -1,8 +1,7 @@
 """Загрузка датасетов и формирование смешанных выборок (реал + синтетика).
 
-Главное исправление: тестовая выборка отделяется от обучающей ДО набора трейна,
-поэтому одни и те же реальные изображения больше не попадают и в train, и в test
-(раньше get_mixed_data делал два независимых np.random.choice -> утечка).
+Тестовая выборка отделяется от обучающей до набора трейна, поэтому реальные
+изображения из теста не попадают в обучение.
 """
 import os
 from pathlib import Path
@@ -71,6 +70,8 @@ def get_mixed_data(real_params: tuple, synthetic_params: tuple, test_size=60, rn
         real_params, synthetic_params)
 
     n_real = len(X_real_full)
+    if n_real == 0:
+        raise ValueError("реальный датасет пуст: проверьте папки images/ и bitmaps/")
     if test_size + real_elements_num > n_real:
         raise ValueError(
             f"test_size ({test_size}) + реальных в трейне ({real_elements_num}) "
@@ -93,7 +94,9 @@ def get_mixed_data(real_params: tuple, synthetic_params: tuple, test_size=60, rn
         y_mixed = np.concatenate((y_real, y_synth))
     elif len(X_real):
         X_mixed, y_mixed = X_real, y_real
-    else:
+    elif len(X_synth):
         X_mixed, y_mixed = X_synth, y_synth
+    else:
+        raise ValueError("обучающая выборка пуста: обе доли (реальных и синтетики) равны нулю")
 
     return X_mixed, y_mixed, X_test, y_test

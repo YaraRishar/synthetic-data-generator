@@ -1,8 +1,4 @@
-"""Архитектура сегментации и метрики/потери.
-
-Единственное место, где описана U-Net-модель и dice-loss --- раньше этот код был
-скопирован в model.py, saved_model.py и utils.py.
-"""
+"""U-Net для сегментации дефектов, dice-loss и метрики IoU."""
 import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import (Input, Conv2D, MaxPooling2D, UpSampling2D,
@@ -26,12 +22,8 @@ def dice_loss(y_true, y_pred):
 
 
 def make_metrics():
-    """Метрики сегментации.
-
-    Defect-IoU (target_class_ids=[1]) --- это IoU именно по дефекту, а не по фону
-    (раньше saved_model.py ошибочно мерил класс 0 = фон). mean-IoU оставлен для
-    сравнения с прежними прогонами model.py.
-    """
+    """Метрики сегментации: IoU по классу дефекта (target_class_ids=[1]) и
+    усреднённый IoU по обоим классам."""
     return [
         tf.keras.metrics.BinaryIoU(target_class_ids=[1], threshold=0.5, name="defect_iou"),
         tf.keras.metrics.BinaryIoU(target_class_ids=(0, 1), threshold=0.5, name="mean_iou"),

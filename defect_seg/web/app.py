@@ -1,8 +1,8 @@
 """Веб-интерфейс (Streamlit) для synthetic-data-generator.
 
-Запуск:  streamlit run streamlit_app.py
-Локализация RU(по умолчанию)/EN переключается в сайдбаре.
-Тяжёлые зависимости (tensorflow) импортируются лениво --- только при обучении.
+Запуск: streamlit run defect_seg/web/app.py
+Язык RU/EN переключается в сайдбаре. tensorflow импортируется лениво, только при
+запуске обучения.
 """
 import glob
 import json
@@ -159,8 +159,8 @@ def _do_train(real, synth, mode, epochs, batch, test_size, max_images,
     _render_results_chart(results)
     st.dataframe(rows, use_container_width=True)
 
-    # примеры предсказаний (их пишет train.run в predictions/)
-    overlays = sorted(glob.glob(os.path.join(real, "predictions", "**", "*_overlay.jpg"),
+    # примеры предсказаний (train.run пишет их в results_dir/predictions)
+    overlays = sorted(glob.glob(os.path.join(cfg.results_dir, "predictions", "**", "*_overlay.jpg"),
                                 recursive=True), key=os.path.getmtime, reverse=True)[:3]
     if overlays:
         st.subheader(t("samples_title"))

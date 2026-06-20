@@ -88,8 +88,7 @@ class VerifierGUI:
         args = [real_path, synthetic_path, epoch_count, batch_count, test_size]
 
         self.update_output("Контейнер запущен...")
-        # передаём ССЫЛКУ на функцию (раньше она вызывалась сразу, блокируя GUI),
-        # аргументы --- через kwargs, обновления UI --- через потокобезопасный callback
+        # обучение в фоновом потоке, обновления UI идут через потокобезопасный callback
         threading.Thread(
             target=self.docker_manager.run_script,
             kwargs={"args_for_model": args, "callback": self.post_output},

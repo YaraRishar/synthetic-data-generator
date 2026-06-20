@@ -8,7 +8,7 @@ from defect_seg.cv_io import imread_unicode
 def get_contours(image_path: str) -> list:
     """ Найти контуры дефекта на bitmap, аппроксимировать кривые найденных контуров """
 
-    image = imread_unicode(image_path)  # кириллические имена дефектов -> Unicode-safe
+    image = imread_unicode(image_path)
     if image is None:
         raise FileNotFoundError(f"не удалось прочитать {image_path}")
     im_grayscale = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -31,7 +31,7 @@ def get_bound_box(image_path: str) -> list:
 
 def contours_csv(idx: int, image_path: str, path_to_csv: str):
     """ Сформировать csv файл контуров.
-    idx --- номер изображения в датасете (используется только в имени файла выше).
+    idx - номер изображения в датасете (используется только в имени файла выше).
     Формат строки: <номер_контура>; x1; y1; x2; y2; ... """
 
     contours = get_contours(image_path)

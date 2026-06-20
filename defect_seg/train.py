@@ -1,13 +1,12 @@
-"""Единая точка входа обучения (заменяет дублирующие model.py и saved_model.py).
+"""Обучение сегментации.
 
 Режимы:
-  sweep  --- перебор доли синтетики 0.0..1.0 (по умолчанию), для исследования
-           влияния синтетики на качество;
-  single --- один прогон с заданными real-size/synthetic-size.
+  sweep  - перебор доли синтетики 0.0..1.0 для оценки её влияния на качество;
+  single - один прогон с заданными real-size/synthetic-size.
 
-Результаты сохраняются в JSON (раньше только печатались в stdout и терялись).
+Метрики каждого прогона сохраняются в results/*.json.
 Запуск:
-  python train.py REAL SYNTH [EPOCHS BATCH TEST] [--mode single --real-size 0.5 ...]
+  python -m defect_seg.train REAL SYNTH [EPOCHS BATCH TEST] [--mode single ...]
 """
 import json
 import os
@@ -61,8 +60,8 @@ def _fractions(cfg: TrainConfig):
 
 
 def run(cfg: TrainConfig, keras_callbacks=None, on_fraction=None) -> dict:
-    """keras_callbacks --- доп. колбэки Keras на каждый fit (например, прогресс UI).
-    on_fraction(idx, total, real_size, synth_size, metrics) --- после каждой доли."""
+    """keras_callbacks - доп. колбэки Keras на каждый fit (например, прогресс UI).
+    on_fraction(idx, total, real_size, synth_size, metrics) - после каждой доли."""
     rng = np.random.default_rng(cfg.seed)
     time_start = time.time()
     print("Загрузка датасетов...")
@@ -77,6 +76,8 @@ def run(cfg: TrainConfig, keras_callbacks=None, on_fraction=None) -> dict:
                "real_elements": [], "synthetic_elements": [], "total_time": -1}
 
     fractions = _fractions(cfg)
+    sample = sorted(os.listdir(os.path.join(cfg.real, "images")))[::10]
+    pred_root = Path(cfg.results_dir) / "predictions"
     for frac_idx, (real_size, synthetic_size) in enumerate(fractions):
         tf.keras.backend.clear_session()  # не копить графы между прогонами
         real_params = (X_real_full, y_real_full, real_size)
@@ -94,8 +95,7 @@ def run(cfg: TrainConfig, keras_callbacks=None, on_fraction=None) -> dict:
                   epochs=cfg.epochs, batch_size=cfg.batch, verbose=1,
                   callbacks=cbs)
 
-        out_dir = Path(cfg.real) / "predictions" / f"pred{real_size}"
-        sample = sorted(os.listdir(os.path.join(cfg.real, "images")))[::10]
+        out_dir = pred_root / f"pred{real_size}"
         seg_viz.visualize_predictions(cfg.real, model, sample, out_dir,
                                       threshold=cfg.threshold)
 
@@ -130,5 +130,5 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    # обратная совместимость с docker_runner: model.py REAL SYNTH EPOCHS BATCH TEST
+    # позиционные аргументы: REAL SYNTH [EPOCHS BATCH TEST]
     main(sys.argv[1:])

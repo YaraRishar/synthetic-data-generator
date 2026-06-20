@@ -18,8 +18,10 @@ def _overlay(img_gray, true_mask, pred_mask):
     true_c[true_mask > 0] = [0, 255, 0]
     pred_c[pred_mask > 0] = [0, 0, 255]
     overlay = img_color.copy()
-    overlay[true_mask > 0] = overlay[true_mask > 0] * 0.3 + true_c[true_mask > 0] * 0.7
-    overlay[pred_mask > 0] = overlay[pred_mask > 0] * 0.2 + pred_c[pred_mask > 0] * 0.8
+    tm = true_mask > 0
+    pm = pred_mask > 0
+    overlay[tm] = np.clip(overlay[tm] * 0.3 + true_c[tm] * 0.7, 0, 255).astype(np.uint8)
+    overlay[pm] = np.clip(overlay[pm] * 0.2 + pred_c[pm] * 0.8, 0, 255).astype(np.uint8)
     return overlay
 
 
@@ -27,7 +29,7 @@ def visualize_predictions(dataset_path, model, image_names, out_dir, threshold=0
                           image_size=IMAGE_SIZE):
     """Сохранить overlay для списка изображений (батч-инференс).
 
-    image_names --- итерируемое имён файлов из dataset_path/images.
+    image_names - итерируемое имён файлов из dataset_path/images.
     out_dir создаётся при необходимости (кроссплатформенно).
     """
     dataset_path = Path(dataset_path)

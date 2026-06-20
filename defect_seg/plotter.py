@@ -1,16 +1,13 @@
 """График IoU/Loss в зависимости от доли синтетики.
 
-Читает результаты из results/*.json (их пишет train.py). Если файлов нет ---
-падает на встроенные данные прежних прогонов. Можно указать файл аргументом:
-    python plotter.py [results/run_XXX.json] [--save out.png]
+Читает результаты из results/*.json. При отсутствии файлов использует встроенный
+набор данных. Можно указать файл аргументом:
+    python -m defect_seg.plotter [results/run_XXX.json] [--save out.png]
 """
 import argparse
 import glob
 import json
 import os
-
-import matplotlib
-import matplotlib.pyplot as plt
 
 
 def _embedded():
@@ -35,7 +32,7 @@ def load_results(path=None):
     if path and os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
-    print("results/*.json не найдены --- использую встроенные данные")
+    print("results/*.json не найдены - использую встроенные данные")
     return _embedded()
 
 
@@ -44,8 +41,10 @@ def main():
     p.add_argument("results", nargs="?", default=None)
     p.add_argument("--save", default=None, help="сохранить в файл вместо показа")
     a = p.parse_args()
+    import matplotlib
     if a.save:
         matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
 
     data = load_results(a.results)
     x = data["synthetic_size"]
