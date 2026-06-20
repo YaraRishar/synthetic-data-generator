@@ -21,10 +21,10 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import (ReduceLROnPlateau, EarlyStopping,
                                         ModelCheckpoint)
 
-import seg_data
-import seg_model
-import seg_viz
-from config import TrainConfig, parse_args
+from defect_seg import data as seg_data
+from defect_seg import model as seg_model
+from defect_seg import viz as seg_viz
+from defect_seg.config import TrainConfig, parse_args
 
 
 def _make_callbacks(weights_path=""):

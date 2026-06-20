@@ -13,4 +13,5 @@ WORKDIR /tf
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir opencv-python-headless keras pandas scikit-learn
 
-CMD ["python", "/tf/train.py"]
+# репозиторий монтируется в /tf; запускаем тренировку как модуль пакета
+CMD ["python", "-m", "defect_seg.train"]

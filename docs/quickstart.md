@@ -31,10 +31,10 @@
 Из папки проекта:
 
 ```bash
-poetry run streamlit run streamlit_app.py
+poetry run streamlit run defect_seg/web/app.py
 ```
 
-(или `poetry shell`, а затем просто `streamlit run streamlit_app.py`).
+(или `poetry shell`, а затем просто `streamlit run defect_seg/web/app.py`).
 
 Откроется вкладка браузера (по умолчанию `http://localhost:8501`). Если нет —
 адрес будет напечатан в терминале.

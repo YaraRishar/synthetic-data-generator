@@ -17,8 +17,9 @@ class DockerManager:
             print("Building image...")
             self.client.images.build(path=".", tag=self.image_name)
 
-    def run_script(self, args_for_model, callback=None, script="train.py"):
-        command = " ".join(["python", f"/tf/{script}"] + [str(a) for a in args_for_model])
+    def run_script(self, args_for_model, callback=None, module="defect_seg.train"):
+        # запускаем как модуль: рабочая директория /tf, пакет defect_seg лежит в /tf
+        command = " ".join(["python", "-m", module] + [str(a) for a in args_for_model])
 
         run_kwargs = dict(
             image=self.image_name,

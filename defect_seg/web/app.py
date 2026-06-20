@@ -14,8 +14,8 @@ import cv2 as cv
 import numpy as np
 import streamlit as st
 
-import i18n
-from i18n import t
+from defect_seg.web import i18n
+from defect_seg.web.i18n import t
 
 DEFAULT_REAL = "example_datasets_scratches/real"
 DEFAULT_SYNTH = "example_datasets_scratches/synthetic"
@@ -47,8 +47,8 @@ def render_help():
 
 
 def render_preview(real, synth):
-    import seg_data
-    from cv_io import imread_unicode
+    from defect_seg import data as seg_data  # noqa: F401
+    from defect_seg.cv_io import imread_unicode
     if not _dataset_ok(real):
         st.error(t("err_path_missing", path=real))
         return
@@ -125,8 +125,8 @@ def render_train():
 def _do_train(real, synth, mode, epochs, batch, test_size, max_images,
               real_size, synth_size, threshold, lr, seed):
     import tensorflow as tf
-    import train
-    from config import TrainConfig
+    from defect_seg import train
+    from defect_seg.config import TrainConfig
 
     cfg = TrainConfig(real=real, synthetic=synth, epochs=epochs, batch=batch,
                       test_size=test_size, mode=mode, real_size=real_size,
@@ -165,7 +165,7 @@ def _do_train(real, synth, mode, epochs, batch, test_size, max_images,
     if overlays:
         st.subheader(t("samples_title"))
         cols = st.columns(len(overlays))
-        from cv_io import imread_unicode
+        from defect_seg.cv_io import imread_unicode
         for col, p in zip(cols, overlays):
             im = imread_unicode(p, cv.IMREAD_COLOR)
             if im is not None:
@@ -193,7 +193,7 @@ def render_contours():
                         key="extract_what")
 
     if st.button(t("extract_btn"), key="extract_btn") and up is not None:
-        import contours as contours_mod
+        from defect_seg import contours as contours_mod
         data = np.frombuffer(up.getvalue(), dtype=np.uint8)
         img = cv.imdecode(data, cv.IMREAD_COLOR)
         with tempfile.TemporaryDirectory() as d:

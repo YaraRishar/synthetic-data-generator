@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from tkinter import font, filedialog, scrolledtext
 
-from docker_runner import DockerManager
+from defect_seg.docker_runner import DockerManager
 
 """
 КОМАНДА (Linux):

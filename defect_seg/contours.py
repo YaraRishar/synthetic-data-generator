@@ -2,7 +2,7 @@ import csv
 
 import cv2 as cv
 
-from cv_io import imread_unicode
+from defect_seg.cv_io import imread_unicode
 
 
 def get_contours(image_path: str) -> list:

@@ -1,7 +1,7 @@
 """Тесты веб-интерфейса (Streamlit AppTest) для synthetic-data-generator.
 
-Запуск без pytest:  python tests/test_streamlit_app.py
-Запуск с pytest:    pytest tests/test_streamlit_app.py
+Запуск без pytest:  python tests/test_web.py
+Запуск с pytest:    pytest tests/test_web.py
 """
 import glob
 import os
@@ -9,12 +9,11 @@ import shutil
 import sys
 
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, APP_DIR)
 os.chdir(APP_DIR)
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
-APP = os.path.join(APP_DIR, "streamlit_app.py")
+APP = os.path.join(APP_DIR, "defect_seg", "web", "app.py")
 
 
 def _run():

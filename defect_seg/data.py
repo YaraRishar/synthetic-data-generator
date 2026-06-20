@@ -10,7 +10,7 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 
-from cv_io import imread_unicode
+from defect_seg.cv_io import imread_unicode
 
 IMAGE_SIZE = (200, 200)
 

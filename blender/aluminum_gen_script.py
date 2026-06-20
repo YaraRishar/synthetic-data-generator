@@ -7,16 +7,18 @@ import numpy as np
 import sys
 import importlib
 
-# contours используется внутри render_bitmaps; импортируем на верхнем уровне,
-# чтобы аддон работал и при регистрации, а не только при запуске как __main__.
-# Каталог .blend-файла нужно добавить в sys.path до импорта.
+# contours лежит в пакете defect_seg (общий с приложением). .blend находится в
+# подпапке blender/, а пакет — на уровень выше, поэтому в sys.path добавляем
+# корень проекта (родитель каталога .blend).
 _blend_dir = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
-if _blend_dir and _blend_dir not in sys.path:
-    sys.path.append(_blend_dir)
+_project_root = os.path.dirname(_blend_dir)
+for _p in (_project_root, _blend_dir):
+    if _p and _p not in sys.path:
+        sys.path.append(_p)
 try:
-    import contours
+    from defect_seg import contours
     importlib.reload(contours)
-except ImportError:
+except Exception:
     contours = None
 
 

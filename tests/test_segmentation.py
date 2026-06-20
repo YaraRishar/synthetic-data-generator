@@ -1,6 +1,6 @@
-"""Тесты synthetic-data-generator.
+"""Тесты synthetic-data-generator (пакет defect_seg).
 
-Запуск без pytest:   python tests/test_synthetic.py
+Запуск без pytest:   python tests/test_segmentation.py
 Запуск с pytest:     pytest tests/
 """
 import os
@@ -9,12 +9,13 @@ import tempfile
 
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# работаем из корня проекта (относительные пути к example_datasets_scratches)
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import seg_data
-import seg_model
-import seg_viz
-import contours
+from defect_seg import data as seg_data
+from defect_seg import model as seg_model
+from defect_seg import viz as seg_viz
+from defect_seg import contours
 
 EX = "example_datasets_scratches"
 

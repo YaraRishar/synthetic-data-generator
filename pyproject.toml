@@ -18,8 +18,8 @@ dependencies = [
 ]
 
 [tool.poetry]
-# приложение, а не библиотека: не собираем/не ставим сам проект как пакет
-package-mode = false
+# пакет defect_seg ставится editable (poetry install) -> чистые абсолютные импорты
+packages = [{ include = "defect_seg" }]
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.0"
