@@ -8,7 +8,7 @@ import sys
 import importlib
 
 # contours лежит в пакете defect_seg (общий с приложением). .blend находится в
-# подпапке blender/, а пакет — на уровень выше, поэтому в sys.path добавляем
+# подпапке blender/, а пакет --- на уровень выше, поэтому в sys.path добавляем
 # корень проекта (родитель каталога .blend).
 _blend_dir = os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
 _project_root = os.path.dirname(_blend_dir)
@@ -270,7 +270,7 @@ def dir_handler(output_path: str) -> str:
     """ Создать папки для вывода отрендеренных изображений и bitmaps """
 
     now = datetime.now()
-    # подчёркивание вместо пробела — единообразно и безопасно для всех ОС
+    # подчёркивание вместо пробела --- единообразно и безопасно для всех ОС
     folder = now.strftime("%H-%M-%S_%d.%m.%Y")
     path = os.path.join(output_path, folder)
     os.makedirs(os.path.join(path, "images"), exist_ok=True)
@@ -430,7 +430,7 @@ def render_bitmaps(path: str, present_list: list, image_indx: int, max_tries: in
 
         # CONTOURS!
         if (find_contours or find_bound_box) and contours is None:
-            print("Модуль contours не найден рядом с .blend — пропускаю контуры/bbox")
+            print("Модуль contours не найден рядом с .blend --- пропускаю контуры/bbox")
         if find_contours and contours is not None:
             contours.contours_csv(idx=image_indx, image_path=path_to_bitmap, path_to_csv=path_to_csv)
         if find_bound_box and contours is not None:
@@ -448,7 +448,7 @@ def limit_blank_defects(path_to_image: str, node, max_tries: int):
         im = cv.imdecode(np.fromfile(path_to_image, dtype=np.uint8), cv.IMREAD_COLOR)
         if im is None:
             break
-        # считаем НЕ чёрные (дефектные) пиксели; раньше было im >= 0 — это всегда
+        # считаем НЕ чёрные (дефектные) пиксели; раньше было im >= 0 --- это всегда
         # все пиксели, поэтому защита от пустых дефектов никогда не срабатывала
         whites = int(np.count_nonzero(im > 0))
         if whites >= 100:

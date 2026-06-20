@@ -1,6 +1,6 @@
 """Архитектура сегментации и метрики/потери.
 
-Единственное место, где описана U-Net-модель и dice-loss — раньше этот код был
+Единственное место, где описана U-Net-модель и dice-loss --- раньше этот код был
 скопирован в model.py, saved_model.py и utils.py.
 """
 import tensorflow as tf
@@ -28,7 +28,7 @@ def dice_loss(y_true, y_pred):
 def make_metrics():
     """Метрики сегментации.
 
-    Defect-IoU (target_class_ids=[1]) — это IoU именно по дефекту, а не по фону
+    Defect-IoU (target_class_ids=[1]) --- это IoU именно по дефекту, а не по фону
     (раньше saved_model.py ошибочно мерил класс 0 = фон). mean-IoU оставлен для
     сравнения с прежними прогонами model.py.
     """

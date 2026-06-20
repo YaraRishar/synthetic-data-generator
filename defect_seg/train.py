@@ -1,9 +1,9 @@
 """Единая точка входа обучения (заменяет дублирующие model.py и saved_model.py).
 
 Режимы:
-  sweep  — перебор доли синтетики 0.0..1.0 (по умолчанию), для исследования
+  sweep  --- перебор доли синтетики 0.0..1.0 (по умолчанию), для исследования
            влияния синтетики на качество;
-  single — один прогон с заданными real-size/synthetic-size.
+  single --- один прогон с заданными real-size/synthetic-size.
 
 Результаты сохраняются в JSON (раньше только печатались в stdout и терялись).
 Запуск:
@@ -61,8 +61,8 @@ def _fractions(cfg: TrainConfig):
 
 
 def run(cfg: TrainConfig, keras_callbacks=None, on_fraction=None) -> dict:
-    """keras_callbacks — доп. колбэки Keras на каждый fit (например, прогресс UI).
-    on_fraction(idx, total, real_size, synth_size, metrics) — после каждой доли."""
+    """keras_callbacks --- доп. колбэки Keras на каждый fit (например, прогресс UI).
+    on_fraction(idx, total, real_size, synth_size, metrics) --- после каждой доли."""
     rng = np.random.default_rng(cfg.seed)
     time_start = time.time()
     print("Загрузка датасетов...")

@@ -89,7 +89,7 @@ class VerifierGUI:
 
         self.update_output("Контейнер запущен...")
         # передаём ССЫЛКУ на функцию (раньше она вызывалась сразу, блокируя GUI),
-        # аргументы — через kwargs, обновления UI — через потокобезопасный callback
+        # аргументы --- через kwargs, обновления UI --- через потокобезопасный callback
         threading.Thread(
             target=self.docker_manager.run_script,
             kwargs={"args_for_model": args, "callback": self.post_output},
@@ -97,7 +97,7 @@ class VerifierGUI:
         ).start()
 
     def post_output(self, text):
-        # вызывается из фонового потока → откладываем в UI-поток
+        # вызывается из фонового потока -> откладываем в UI-поток
         self.root.after(0, self.update_output, text)
 
     def update_output(self, text):

@@ -27,7 +27,7 @@ def visualize_predictions(dataset_path, model, image_names, out_dir, threshold=0
                           image_size=IMAGE_SIZE):
     """Сохранить overlay для списка изображений (батч-инференс).
 
-    image_names — итерируемое имён файлов из dataset_path/images.
+    image_names --- итерируемое имён файлов из dataset_path/images.
     out_dir создаётся при необходимости (кроссплатформенно).
     """
     dataset_path = Path(dataset_path)

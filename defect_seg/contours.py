@@ -31,7 +31,7 @@ def get_bound_box(image_path: str) -> list:
 
 def contours_csv(idx: int, image_path: str, path_to_csv: str):
     """ Сформировать csv файл контуров.
-    idx — номер изображения в датасете (используется только в имени файла выше).
+    idx --- номер изображения в датасете (используется только в имени файла выше).
     Формат строки: <номер_контура>; x1; y1; x2; y2; ... """
 
     contours = get_contours(image_path)

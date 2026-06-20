@@ -2,7 +2,7 @@
 
 Запуск:  streamlit run streamlit_app.py
 Локализация RU(по умолчанию)/EN переключается в сайдбаре.
-Тяжёлые зависимости (tensorflow) импортируются лениво — только при обучении.
+Тяжёлые зависимости (tensorflow) импортируются лениво --- только при обучении.
 """
 import glob
 import json
@@ -241,7 +241,7 @@ def render_results():
 
 
 def main():
-    st.set_page_config(page_title=t("app_title"), page_icon="🔧", layout="wide")
+    st.set_page_config(page_title=t("app_title"), layout="wide")
     i18n.language_selector()
     st.title(t("app_title"))
     st.caption(t("app_caption"))

@@ -1,6 +1,6 @@
 """График IoU/Loss в зависимости от доли синтетики.
 
-Читает результаты из results/*.json (их пишет train.py). Если файлов нет —
+Читает результаты из results/*.json (их пишет train.py). Если файлов нет ---
 падает на встроенные данные прежних прогонов. Можно указать файл аргументом:
     python plotter.py [results/run_XXX.json] [--save out.png]
 """
@@ -35,7 +35,7 @@ def load_results(path=None):
     if path and os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
-    print("results/*.json не найдены — использую встроенные данные")
+    print("results/*.json не найдены --- использую встроенные данные")
     return _embedded()
 
 
