@@ -7,11 +7,17 @@
 
 ## Что понадобится
 
-- Python 3.10–3.12 и установленные зависимости:
+- Python 3.11 или 3.12 (TensorFlow 2.19 ещё не поддерживает 3.13) и
+  [Poetry](https://python-poetry.org/). Установка зависимостей:
   ```bash
-  pip install -r requirements.txt
+  poetry install
   ```
-  (в них уже входят `streamlit` и `tensorflow`).
+  Poetry создаст локальное окружение `.venv` прямо в папке проекта и поставит
+  туда всё (включая `streamlit` и `tensorflow`). Если в системе несколько версий
+  Python, заранее укажите нужную:
+  ```bash
+  poetry env use 3.12
+  ```
 - Датасет в формате «папка с двумя подпапками»:
   - `images/` — снимки (`image0.jpg`, `image1.jpg`, …);
   - `bitmaps/` — маски дефектов (`bitmap0.jpg`, …), парные по номеру.
@@ -25,8 +31,10 @@
 Из папки проекта:
 
 ```bash
-streamlit run streamlit_app.py
+poetry run streamlit run streamlit_app.py
 ```
+
+(или `poetry shell`, а затем просто `streamlit run streamlit_app.py`).
 
 Откроется вкладка браузера (по умолчанию `http://localhost:8501`). Если нет —
 адрес будет напечатан в терминале.
